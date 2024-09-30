@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>User Locations Map</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@2.2.19/dist/tailwind.min.css" rel="stylesheet">
+  <!-- Montserrat Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;700&display=swap" rel="stylesheet">
+  
+  <style>
+    /* Set the size of the map container */
+    #map {
+      height: 400px; /* Set a fixed height for the map */
+      width: 100%;
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+      font-family: 'Montserrat', sans-serif; /* Use Montserrat font */
+    }
+    body {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+    #map-container {
+      flex: 1;
+      width: 100%;
+    }
+  </style>
+  
+  <!-- Google Maps API -->
+  <script async defer src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCE_j6fipxX3sUoRLMfEqG9Q7eZ2d3frTc&callback=initMap"></script>
+</head>
+
+<body>
+  <h1 class="text-2xl font-bold my-4">User Locations on Map</h1>
+  
+  <!-- The div element for the map -->
+  <div id="map-container">
+    <div id="map"></div>
+  </div>
+  
+  <!-- Container for user location cards -->
+  <div id="locations-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 p-4">
+    <!-- User location cards will be injected here -->
+  </div>
+  
+  <!-- Firebase SDK -->
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-app.js";
+    import { getFirestore, getDocs, collection } from "https://www.gstatic.com/firebasejs/9.22.2/firebase-firestore.js";
+
+    // Initialize Firebase
+    const firebaseConfig = {
+      apiKey: "AIzaSyD57QYhIVbgk7gzKGDM6TbsVWyZNXnncoA",
+      authDomain: "todolist-59971.firebaseapp.com",
+      databaseURL: "https://todolist-59971.firebaseio.com",
+      projectId: "todolist-59971",
+      storageBucket: "todolist-59971.appspot.com",
+      messagingSenderId: "317389610882",
+      appId: "1:317389610882:web:67d6e7844fe5cc1c93799b",
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const db = getFirestore(app);
+
+    // Fetch user locations from Firestore
+    async function fetchUserLocations() {
+      const locations = [];
+      const querySnapshot = await getDocs(collection(db, "userLocations"));
+      querySnapshot.forEach((doc) => {
+        const data = doc.data();
+        locations.push({ 
+          id: doc.id, 
+          lat: data.latitude, 
+          lng: data.longitude,
+          timestamp: data.timestamp,
+          userId: data.userId,
+          deviceType: data.deviceType,
+          userAgent: data.userAgent,
+          screenWidth: data.screenWidth,
+          screenHeight: data.screenHeight,
+          referrer: data.referrer,
+          userLanguage: data.userLanguage,
+          userTimezone: data.userTimezone,
+        });
+      });
+      return locations;
+    }
+
+    // Initialize and add the map
+    window.initMap = async function () {
+      const userLocations = await fetchUserLocations();
+
+      // The map, centered at a default location
+      const map = new google.maps.Map(document.getElementById("map"), {
+        zoom: 5,
+        center: { lat: 25.276987, lng: 55.296249 }, // Dubai coordinates
+      });
+
+      // Add markers to the map and create cards
+      userLocations.forEach((location) => {
+        const marker = new google.maps.Marker({
+          position: location,
+          map: map,
+        });
+
+        // Create and append user location card
+        const card = document.createElement('div');
+        card.className = 'bg-white shadow-md rounded-lg p-4 cursor-pointer hover:shadow-lg transition-shadow duration-200';
+        card.innerHTML = `
+          <h2 class="font-bold">Location ID: ${location.id}</h2>
+          <p>Latitude: ${location.lat}</p>
+          <p>Longitude: ${location.lng}</p>
+          <p>Timestamp: ${new Date(location.timestamp).toLocaleString()}</p>
+          <p>User ID: ${location.userId}</p>
+          <p>Device Type: ${location.deviceType}</p>
+          <p>User Agent: ${location.userAgent}</p>
+          <p>Screen Width: ${location.screenWidth}</p>
+          <p>Screen Height: ${location.screenHeight}</p>
+          <p>Referrer: ${location.referrer}</p>
+          <p>User Language: ${location.userLanguage}</p>
+          <p>User Timezone: ${location.userTimezone}</p>
+        `;
+        document.getElementById('locations-container').appendChild(card);
+
+        // Add click event to center the map on the clicked card
+        card.addEventListener('click', () => {
+          map.setCenter({ lat: location.lat, lng: location.lng });
+          map.setZoom(10); // Zoom in on the selected location
+        });
+      });
+    }
+  </script>
+</body>
+</html>
