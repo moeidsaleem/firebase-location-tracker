@@ -112,17 +112,20 @@
 
         // Create and append user location card
         const card = document.createElement('div');
-        card.className = 'bg-white shadow-md rounded-lg p-4 cursor-pointer hover:shadow-lg transition-shadow duration-200';
-        card.innerHTML = `
-          <h2 class="font-bold">Location ID: ${location.id}</h2>
-          <p>Latitude: ${location.lat}</p>
-          <p>Longitude: ${location.lng}</p>
-          <p>Timestamp: ${new Date(location.timestamp).toLocaleString()}</p>
-          <p>Device Type: ${location.deviceType}</p>
-          <p>User Agent: ${location.userAgent}</p>
-          <p>User Language: ${location.userLanguage}</p>
-          <p>User Timezone: ${location.userTimezone}</p>
-        `;
+card.className = 'bg-white shadow-md rounded-lg p-4 cursor-pointer hover:shadow-lg transition-shadow duration-200';
+card.innerHTML = `
+  <h2 class="font-bold text-xl mb-2">📍 Location ID: ${location.id}</h2>
+  <div class="text-sm text-gray-600">
+    <p>📏 <strong>Latitude:</strong> ${location.lat}</p>
+    <p>📏 <strong>Longitude:</strong> ${location.lng}</p>
+    <p>🕒 <strong>Timestamp:</strong> ${new Date(location.timestamp).toLocaleString()}</p>
+    <p>💻 <strong>Device Type:</strong> ${location.deviceType}</p>
+    <p>🖥️ <strong>User Agent:</strong> ${location.userAgent}</p>
+    <p>🌐 <strong>User Language:</strong> ${location.userLanguage}</p>
+    <p>⏰ <strong>User Timezone:</strong> ${location.userTimezone}</p>
+  </div>
+`;
+
         document.getElementById('locations-container').appendChild(card);
 
         // Add click event to center the map on the clicked card
